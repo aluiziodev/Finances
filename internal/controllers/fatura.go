@@ -3,24 +3,66 @@ package controllers
 import (
 	"encoding/json"
 	"finances/internal/models"
-	"finances/internal/parser"
 	"finances/internal/response"
+	"finances/internal/service"
+	"fmt"
 	"net/http"
 )
 
-func GetFatura(w http.ResponseWriter, r *http.Request) {
+func CreateFatura(w http.ResponseWriter, r *http.Request) {
 
 	var req models.RequestFatura
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.ErrorResponse(w, http.StatusBadRequest, "Erro no corpo da requisiçao!")
-		return
-	}
 
-	fatura, err := parser.ParserCSVtoModels(req.Path, req.Description, req.Status)
+	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
-		response.ErrorResponse(w, http.StatusInternalServerError, "Erro no parser do csv!")
+		fmt.Println("ERRO MULTIPART:", err)
+		response.ErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	response.WriteJSON(w, http.StatusOK, *fatura)
+	data_json := r.FormValue("data")
+	if err := json.Unmarshal([]byte(data_json), &req); err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	file, handler, err := r.FormFile("csv")
+	if err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	defer file.Close()
+
+	fatura, err := service.CreateFatura(file, handler, req)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.WriteJSON(w, http.StatusCreated, *fatura)
+}
+
+func ShowFaturas(w http.ResponseWriter, r *http.Request) {
+	faturas, err := service.GetAllFaturas()
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, faturas)
+
+}
+
+func GetFatura(w http.ResponseWriter, r *http.Request) {
+
+	id := r.PathValue("id")
+
+	fatura, err := service.GetFatura(id)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, fatura)
+
 }

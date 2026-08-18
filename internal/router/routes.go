@@ -14,6 +14,16 @@ type route struct {
 var routes = []route{
 	{
 		URI:      "/fatura",
+		method:   http.MethodPost,
+		function: controllers.CreateFatura,
+	},
+	{
+		URI:      "/fatura",
+		method:   http.MethodGet,
+		function: controllers.ShowFaturas,
+	},
+	{
+		URI:      "/fatura/{id}",
 		method:   http.MethodGet,
 		function: controllers.GetFatura,
 	},

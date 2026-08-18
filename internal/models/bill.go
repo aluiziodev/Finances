@@ -3,15 +3,13 @@ package models
 import (
 	"strconv"
 	"strings"
-
-	"github.com/google/uuid"
 )
 
 type Bill struct {
-	Id     uuid.UUID `json:"id"`
-	Date   string    `csv:"date"`
-	Title  string    `csv:"title"`
-	Amount Value     `csv:"amount"`
+	Id     string `json:"id"`
+	Date   string `csv:"date"`
+	Title  string `csv:"title"`
+	Amount Value  `csv:"amount"`
 }
 
 type Value float64

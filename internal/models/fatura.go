@@ -2,16 +2,14 @@ package models
 
 import (
 	"errors"
-
-	"github.com/google/uuid"
 )
 
 type Fatura struct {
-	Id          uuid.UUID `json:"id"`
-	Description string    `json:"description"`
-	Bills       []Bill    `json:"bills"`
-	Total       float64   `json:"total"`
-	Status      string    `json:"status"`
+	Id          string  `json:"id"`
+	Description string  `json:"description"`
+	Bills       []Bill  `json:"bills"`
+	Total       float64 `json:"total"`
+	Status      string  `json:"status"`
 }
 
 func (f *Fatura) CalculateTotal() {

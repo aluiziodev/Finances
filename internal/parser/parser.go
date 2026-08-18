@@ -1,22 +1,23 @@
 package parser
 
 import (
+	"errors"
 	"finances/internal/models"
-	"os"
+	"mime/multipart"
+	"strings"
 
 	"github.com/gocarina/gocsv"
 )
 
-func ParserCSVtoModels(path string, description string, status string) (*models.Fatura, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
+func ParserCSVtoModels(file multipart.File, handler *multipart.FileHeader, description string, status string) (models.Fatura, error) {
+
+	if !strings.HasSuffix(strings.ToLower(handler.Filename), ".csv") {
+		return models.Fatura{}, errors.New("arquivo deve ser .csv")
 	}
-	defer file.Close()
 
 	var bills []models.Bill
-	if err := gocsv.UnmarshalFile(file, &bills); err != nil {
-		return nil, err
+	if err := gocsv.Unmarshal(file, &bills); err != nil {
+		return models.Fatura{}, err
 	}
 
 	fatura := models.Fatura{
@@ -24,10 +25,12 @@ func ParserCSVtoModels(path string, description string, status string) (*models.
 		Bills:       bills,
 		Status:      status,
 	}
+
 	fatura.CalculateTotal()
 	if err := fatura.Validate(); err != nil {
-		return nil, err
+		return models.Fatura{}, err
 	}
 
-	return &fatura, nil
+	return fatura, nil
+
 }
