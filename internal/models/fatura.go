@@ -28,7 +28,7 @@ func (f *Fatura) Validate() error {
 		return errors.New("Campo descriçao obrigatorio!!")
 	}
 
-	if f.Status != "pedding" && f.Status != "paid" {
+	if f.Status != "peding" && f.Status != "paid" {
 		return errors.New("Campo status invalido!")
 	}
 

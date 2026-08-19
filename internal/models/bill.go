@@ -7,9 +7,9 @@ import (
 
 type Bill struct {
 	Id     string `json:"id"`
-	Date   string `csv:"date"`
-	Title  string `csv:"title"`
-	Amount Value  `csv:"amount"`
+	Date   string `json:"date" csv:"date"`
+	Title  string `json:"title" csv:"title"`
+	Amount Value  `json:"amount" csv:"amount"`
 }
 
 type Value float64

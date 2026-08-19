@@ -50,7 +50,7 @@ O projeto recebe um arquivo CSV contendo registros financeiros, valida a estrutu
 
 - Go 1.26+
 - PostgreSQL
-- Arquivo `.env` com as variáveis de ambiente
+- Arquivo `.env` na raiz com as variáveis abaixo
 
 ## Variáveis de ambiente
 
@@ -101,10 +101,7 @@ CREATE TABLE bill (
 
 ### Payload da criação
 
-A requisição de criação deve usar `multipart/form-data` com dois campos:
-
-- `data`: JSON com `description` e `status`
-- `csv`: arquivo CSV com as transações
+O campo `data` deve ser um JSON com `description` e `status`.
 
 Exemplo de `data`:
 
@@ -170,11 +167,42 @@ A API ficará disponível em:
 http://localhost:8080
 ```
 
+## Testes
+
+O repositório contém testes unitários. Para executá-los:
+
+```bash
+go test -v ./...
+```
+
+Para executar testes de um pacote específico:
+
+```bash
+go test ./internal/parser -v
+```
+
+## Configuração CORS 
+
+O projeto já inclui um middleware simples de CORS no arquivo [internal/router/router.go](internal/router/router.go). Atualmente ele permite todas as origens e métodos, o que facilita o desenvolvimento front-end:
+
+```go
+w.Header().Set("Access-Control-Allow-Origin", "*")
+w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS")
+w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+```
+
+Se você quiser restringir ao front-end em produção, altere `"*"` para a origem do seu front-end e, se necessário, habilite credenciais:
+
+```go
+w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+w.Header().Set("Access-Control-Allow-Credentials", "true")
+```
+
+Lembre-se de ajustar os cabeçalhos permitidos em `Access-Control-Allow-Headers` caso o front-end envie cabeçalhos personalizados.
+
 ## Próximas features
 
-- Implementar testes automatizados
-- Criar uma interface de usuário e fazer deploy em um ambiente de produção
+- Incluir novas funcionalidades financeiras
 - Criar histórico de alterações
 - Incluir autenticação
 - Suportar exportação em outros formatos
-- Incluir novas funcionalidades financeiras
