@@ -9,6 +9,10 @@ import (
 	"net/http"
 )
 
+var getFaturaService = func() *service.FaturaService {
+	return service.NewFaturaService()
+}
+
 func CreateFatura(w http.ResponseWriter, r *http.Request) {
 
 	var req models.RequestFatura
@@ -33,6 +37,7 @@ func CreateFatura(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
+	service := getFaturaService()
 	fatura, err := service.CreateFatura(file, handler, req)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -43,6 +48,7 @@ func CreateFatura(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowFaturas(w http.ResponseWriter, r *http.Request) {
+	service := getFaturaService()
 	faturas, err := service.GetAllFaturas()
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -57,6 +63,7 @@ func GetFatura(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
 
+	service := getFaturaService()
 	fatura, err := service.GetFatura(id)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())

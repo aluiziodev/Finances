@@ -6,6 +6,11 @@ import (
 	"finances/internal/models"
 )
 
+type BillRepositoryInterface interface {
+	Create(bill models.Bill, fatura_id string) error
+	GetAllByFaturaId(fatura_id string) ([]models.Bill, error)
+}
+
 type BillRepository struct {
 	db *sql.DB
 }

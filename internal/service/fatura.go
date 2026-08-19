@@ -9,7 +9,23 @@ import (
 	"github.com/google/uuid"
 )
 
-func CreateFatura(file multipart.File, handler *multipart.FileHeader,
+type FaturaService struct {
+	faturaRepo repository.FaturaRepositoryInterface
+	billRepo   repository.BillRepositoryInterface
+}
+
+func NewFaturaServiceWithDependencies(faturaRepo repository.FaturaRepositoryInterface, billRepo repository.BillRepositoryInterface) *FaturaService {
+	return &FaturaService{
+		faturaRepo: faturaRepo,
+		billRepo:   billRepo,
+	}
+}
+
+func NewFaturaService() *FaturaService {
+	return NewFaturaServiceWithDependencies(repository.NewFaturaRepository(), repository.NewBillRepository())
+}
+
+func (s *FaturaService) CreateFatura(file multipart.File, handler *multipart.FileHeader,
 	req models.RequestFatura) (*models.Fatura, error) {
 
 	fatura, err := parser.ParserCSVtoModels(file, handler, req.Description, req.Status)
@@ -18,16 +34,13 @@ func CreateFatura(file multipart.File, handler *multipart.FileHeader,
 	}
 	fatura.Id = uuid.NewString()
 
-	repo := repository.NewFaturaRepository()
-	if err := repo.Create(fatura); err != nil {
+	if err := s.faturaRepo.Create(fatura); err != nil {
 		return nil, err
 	}
 
-	repo_bill := repository.NewBillRepository()
-
 	for _, bill := range fatura.Bills {
 		bill.Id = uuid.NewString()
-		if err := repo_bill.Create(bill, fatura.Id); err != nil {
+		if err := s.billRepo.Create(bill, fatura.Id); err != nil {
 			return nil, err
 		}
 	}
@@ -35,9 +48,8 @@ func CreateFatura(file multipart.File, handler *multipart.FileHeader,
 	return &fatura, nil
 }
 
-func GetAllFaturas() ([]models.Fatura, error) {
-	repo := repository.NewFaturaRepository()
-	faturas, err := repo.GetAll()
+func (s *FaturaService) GetAllFaturas() ([]models.Fatura, error) {
+	faturas, err := s.faturaRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -45,15 +57,13 @@ func GetAllFaturas() ([]models.Fatura, error) {
 	return faturas, nil
 }
 
-func GetFatura(id string) (models.Fatura, error) {
-	repo := repository.NewFaturaRepository()
-	fatura, err := repo.Get(id)
+func (s *FaturaService) GetFatura(id string) (models.Fatura, error) {
+	fatura, err := s.faturaRepo.Get(id)
 	if err != nil {
 		return models.Fatura{}, err
 	}
 
-	repo_bill := repository.NewBillRepository()
-	bills, err := repo_bill.GetAllByFaturaId(id)
+	bills, err := s.billRepo.GetAllByFaturaId(id)
 	if err != nil {
 		return models.Fatura{}, err
 	}
@@ -61,4 +71,17 @@ func GetFatura(id string) (models.Fatura, error) {
 	fatura.Bills = bills
 
 	return fatura, nil
+}
+
+func CreateFatura(file multipart.File, handler *multipart.FileHeader,
+	req models.RequestFatura) (*models.Fatura, error) {
+	return NewFaturaService().CreateFatura(file, handler, req)
+}
+
+func GetAllFaturas() ([]models.Fatura, error) {
+	return NewFaturaService().GetAllFaturas()
+}
+
+func GetFatura(id string) (models.Fatura, error) {
+	return NewFaturaService().GetFatura(id)
 }

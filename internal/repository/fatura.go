@@ -6,6 +6,12 @@ import (
 	"finances/internal/models"
 )
 
+type FaturaRepositoryInterface interface {
+	Create(fatura models.Fatura) error
+	GetAll() ([]models.Fatura, error)
+	Get(id string) (models.Fatura, error)
+}
+
 type FaturaRepository struct {
 	db *sql.DB
 }
