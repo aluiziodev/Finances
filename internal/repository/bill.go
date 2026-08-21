@@ -9,6 +9,7 @@ import (
 type BillRepositoryInterface interface {
 	Create(bill models.Bill, fatura_id string) error
 	GetAllByFaturaId(fatura_id string) ([]models.Bill, error)
+	Delete(id string) error
 }
 
 type BillRepository struct {
@@ -21,9 +22,9 @@ func NewBillRepository() *BillRepository {
 
 func (repo *BillRepository) Create(bill models.Bill, fatura_id string) error {
 	_, err := repo.db.Exec(`
-		INSERT INTO bill (id, title, date, amount, fatura)
-		VALUES ($1, $2, $3, $4, $5)
-	`, bill.Id, bill.Title, bill.Date, bill.Amount, fatura_id)
+		INSERT INTO bill (id, title, date, amount, fatura, method)
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`, bill.Id, bill.Title, bill.Date, bill.Amount, fatura_id, bill.Method)
 	return err
 }
 
@@ -49,4 +50,11 @@ func (repo *BillRepository) GetAllByFaturaId(fatura_id string) ([]models.Bill, e
 	}
 
 	return bills, nil
+}
+
+func (repo *BillRepository) Delete(id string) error {
+	_, err := repo.db.Exec(`
+		DELETE FROM bill WHERE id = $1
+	`, id)
+	return err
 }

@@ -26,6 +26,10 @@ func (f *mockFaturaRepo) Get(id string) (models.Fatura, error) {
 	return f.byId, nil
 }
 
+func (f *mockFaturaRepo) Delete(id string) error {
+	return nil
+}
+
 type mockBillRepo struct {
 	created []models.Bill
 	list    []models.Bill
@@ -38,6 +42,10 @@ func (f *mockBillRepo) Create(bill models.Bill, faturaID string) error {
 
 func (f *mockBillRepo) GetAllByFaturaId(faturaID string) ([]models.Bill, error) {
 	return f.list, nil
+}
+
+func (f *mockBillRepo) Delete(id string) error {
+	return nil
 }
 
 func createMultipartCSV(t *testing.T, filename string, content string) (multipart.File, *multipart.FileHeader) {

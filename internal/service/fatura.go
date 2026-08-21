@@ -40,6 +40,7 @@ func (s *FaturaService) CreateFatura(file multipart.File, handler *multipart.Fil
 
 	for _, bill := range fatura.Bills {
 		bill.Id = uuid.NewString()
+		bill.DefineMethod()
 		if err := s.billRepo.Create(bill, fatura.Id); err != nil {
 			return nil, err
 		}

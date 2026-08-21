@@ -11,37 +11,45 @@ import (
 	"testing"
 )
 
-type fakeControllerFaturaRepo struct {
+type mockControllerFaturaRepo struct {
 	created []models.Fatura
 	list    []models.Fatura
 	byId    models.Fatura
 }
 
-func (f *fakeControllerFaturaRepo) Create(fatura models.Fatura) error {
+func (f *mockControllerFaturaRepo) Create(fatura models.Fatura) error {
 	f.created = append(f.created, fatura)
 	return nil
 }
 
-func (f *fakeControllerFaturaRepo) GetAll() ([]models.Fatura, error) {
+func (f *mockControllerFaturaRepo) GetAll() ([]models.Fatura, error) {
 	return f.list, nil
 }
 
-func (f *fakeControllerFaturaRepo) Get(id string) (models.Fatura, error) {
+func (f *mockControllerFaturaRepo) Get(id string) (models.Fatura, error) {
 	return f.byId, nil
 }
 
-type fakeControllerBillRepo struct {
+func (f *mockControllerFaturaRepo) Delete(id string) error {
+	return nil
+}
+
+type mockControllerBillRepo struct {
 	created []models.Bill
 	list    []models.Bill
 }
 
-func (f *fakeControllerBillRepo) Create(bill models.Bill, faturaID string) error {
+func (f *mockControllerBillRepo) Create(bill models.Bill, faturaID string) error {
 	f.created = append(f.created, bill)
 	return nil
 }
 
-func (f *fakeControllerBillRepo) GetAllByFaturaId(faturaID string) ([]models.Bill, error) {
+func (f *mockControllerBillRepo) GetAllByFaturaId(faturaID string) ([]models.Bill, error) {
 	return f.list, nil
+}
+
+func (f *mockControllerBillRepo) Delete(id string) error {
+	return nil
 }
 
 func makeMultipartCreateRequest(t *testing.T, payload models.RequestFatura, csvContent string) *http.Request {
@@ -78,8 +86,8 @@ func makeMultipartCreateRequest(t *testing.T, payload models.RequestFatura, csvC
 }
 
 func TestCreateFaturaController(t *testing.T) {
-	faturaRepo := &fakeControllerFaturaRepo{}
-	billRepo := &fakeControllerBillRepo{}
+	faturaRepo := &mockControllerFaturaRepo{}
+	billRepo := &mockControllerBillRepo{}
 	originalService := getFaturaService
 	getFaturaService = func() *service.FaturaService {
 		return service.NewFaturaServiceWithDependencies(faturaRepo, billRepo)
@@ -102,8 +110,8 @@ func TestCreateFaturaController(t *testing.T) {
 }
 
 func TestShowFaturasController(t *testing.T) {
-	faturaRepo := &fakeControllerFaturaRepo{list: []models.Fatura{{Id: "1", Description: "Fatura teste", Status: "paid", Total: 50.0}}}
-	billRepo := &fakeControllerBillRepo{}
+	faturaRepo := &mockControllerFaturaRepo{list: []models.Fatura{{Id: "1", Description: "Fatura teste", Status: "paid", Total: 50.0}}}
+	billRepo := &mockControllerBillRepo{}
 	originalService := getFaturaService
 	getFaturaService = func() *service.FaturaService {
 		return service.NewFaturaServiceWithDependencies(faturaRepo, billRepo)
@@ -122,8 +130,8 @@ func TestShowFaturasController(t *testing.T) {
 }
 
 func TestGetFaturaController(t *testing.T) {
-	faturaRepo := &fakeControllerFaturaRepo{byId: models.Fatura{Id: "1", Description: "Fatura teste", Status: "paid", Total: 50.0}}
-	billRepo := &fakeControllerBillRepo{list: []models.Bill{{Id: "b1", Title: "Compra", Amount: 50.0}}}
+	faturaRepo := &mockControllerFaturaRepo{byId: models.Fatura{Id: "1", Description: "Fatura teste", Status: "paid", Total: 50.0}}
+	billRepo := &mockControllerBillRepo{list: []models.Bill{{Id: "b1", Title: "Compra", Amount: 50.0}}}
 	originalService := getFaturaService
 	getFaturaService = func() *service.FaturaService {
 		return service.NewFaturaServiceWithDependencies(faturaRepo, billRepo)

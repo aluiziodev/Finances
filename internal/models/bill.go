@@ -10,6 +10,15 @@ type Bill struct {
 	Date   string `json:"date" csv:"date"`
 	Title  string `json:"title" csv:"title"`
 	Amount Value  `json:"amount" csv:"amount"`
+	Method string `json:"method"`
+}
+
+func (b *Bill) DefineMethod() {
+	if strings.Contains(b.Title, " - Parcela ") {
+		b.Method = "parcelado"
+	} else {
+		b.Method = "fixo"
+	}
 }
 
 type Value float64

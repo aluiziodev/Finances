@@ -10,6 +10,7 @@ type FaturaRepositoryInterface interface {
 	Create(fatura models.Fatura) error
 	GetAll() ([]models.Fatura, error)
 	Get(id string) (models.Fatura, error)
+	Delete(id string) error
 }
 
 type FaturaRepository struct {
@@ -70,4 +71,11 @@ func (repo *FaturaRepository) Get(id string) (models.Fatura, error) {
 		return fatura, nil
 	}
 	return models.Fatura{}, sql.ErrNoRows
+}
+
+func (repo *FaturaRepository) Delete(id string) error {
+	_, err := repo.db.Exec(`
+		DELETE FROM fatura WHERE id = $1
+	`, id)
+	return err
 }

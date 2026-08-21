@@ -4,11 +4,15 @@ CREATE TABLE bill (
     date TEXT NOT NULL,
     amount NUMERIC(10,2) NOT NULL,
     fatura TEXT NOT NULL,
+    method TEXT NOT NULL,
 
     CONSTRAINT fk_fatura
         FOREIGN KEY (fatura)
         REFERENCES fatura(id)
         ON DELETE CASCADE
+    
+    CONSTRAINT method_check
+        CHECK (method in ('parcelado', 'fixo'))
 );
 
 
