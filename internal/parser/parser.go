@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"finances/internal/dto"
 	"finances/internal/models"
 	"mime/multipart"
 	"strings"
@@ -9,7 +10,7 @@ import (
 	"github.com/gocarina/gocsv"
 )
 
-func ParserCSVtoModels(file multipart.File, handler *multipart.FileHeader, req models.RequestFatura) (models.Fatura, error) {
+func ParserCSVtoModels(file multipart.File, handler *multipart.FileHeader, req dto.RequestFatura) (models.Fatura, error) {
 
 	if !strings.HasSuffix(strings.ToLower(handler.Filename), ".csv") {
 		return models.Fatura{}, errors.New("arquivo deve ser .csv")

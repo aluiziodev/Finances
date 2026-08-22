@@ -27,6 +27,8 @@
     "ifd \\*",
     "ifood",
     "rappi",
+    "mc donalds",
+    "burger king",
     "james delivery",
     "restaurante",
     "lanches",
@@ -56,8 +58,7 @@
     "assai",
     "sam's club",
     "sams club",
-    "mp \\*guanabara",
-    "guanabara"
+    "Distribuidora de Alime"
   ],
 
   "saúde": [
@@ -96,7 +97,6 @@
     "icloud",
     "openai",
     "chatgpt",
-    "invictus",
     "adobe",
     "canva"
   ],
@@ -138,7 +138,8 @@
     "steam",
     "playstation network",
     "xbox",
-    "nintendo"
+    "nintendo",
+    "Bulls Beer"
   ],
 
   "varejo": [
@@ -173,6 +174,7 @@
   "educacao": [
     "faculdade",
     "universidade",
+    "invictus",
     "curso",
     "udemy",
     "alura",
@@ -182,6 +184,8 @@
   ],
 
   "viagem": [
+    "mp \\*guanabara",
+    "guanabara",
     "latam",
     "gol linhas",
     "azul linhas",

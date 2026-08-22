@@ -1,4 +1,6 @@
-package models
+package dto
+
+import "finances/internal/models"
 
 var validCategories = []string{
 	"transporte",
@@ -18,17 +20,17 @@ var validCategories = []string{
 }
 
 type Summary struct {
-	Fatura          Fatura             `json:"fatura"`
+	Fatura          ResponseFatura     `json:"fatura"`
 	TotalParcelado  float64            `json:"total_parcelado"`
 	TotalFixo       float64            `json:"total_fixo"`
 	TotalGeneral    float64            `json:"total_geral"`
 	TotalByCategory map[string]float64 `json:"total_by_category"`
 }
 
-func (s *Summary) CalculateTotal(fatura *Fatura) {
+func (s *Summary) CalculateTotal(fatura *models.Fatura) {
 	s.initialize()
 	s.TotalGeneral = fatura.Total
-	s.Fatura = *fatura
+	s.Fatura = NewResponseFatura(fatura)
 	for _, bill := range fatura.Bills {
 		if bill.Method == "parcelado" {
 			s.TotalParcelado += float64(bill.Amount)

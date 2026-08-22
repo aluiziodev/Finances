@@ -2,6 +2,7 @@ package service
 
 import (
 	"finances/internal/categorizer"
+	"finances/internal/dto"
 	"finances/internal/models"
 	"finances/internal/parser"
 	"finances/internal/repository"
@@ -27,7 +28,7 @@ func NewFaturaService() *FaturaService {
 }
 
 func (s *FaturaService) CreateFatura(file multipart.File, handler *multipart.FileHeader,
-	req models.RequestFatura) (*models.Fatura, error) {
+	req dto.RequestFatura) (*string, error) {
 
 	fatura, err := parser.ParserCSVtoModels(file, handler, req)
 	if err != nil {
@@ -60,19 +61,21 @@ func (s *FaturaService) CreateFatura(file multipart.File, handler *multipart.Fil
 		}
 	}
 
-	return &fatura, nil
+	return &fatura.Id, nil
 }
 
-func (s *FaturaService) GetAllFaturas() (*[]models.Fatura, error) {
+func (s *FaturaService) GetAllFaturas() (*[]dto.ResponseFatura, error) {
 	faturas, err := s.faturaRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
 
-	return &faturas, nil
+	responseFaturas := dto.FaturasToResponseFaturas(&faturas)
+
+	return &responseFaturas, nil
 }
 
-func (s *FaturaService) GetFatura(id string) (*models.Fatura, error) {
+func (s *FaturaService) GetFatura(id string) (*dto.Summary, error) {
 	fatura, err := s.faturaRepo.Get(id)
 	if err != nil {
 		return nil, err
@@ -85,7 +88,10 @@ func (s *FaturaService) GetFatura(id string) (*models.Fatura, error) {
 
 	fatura.Bills = bills
 
-	return &fatura, nil
+	summary := dto.Summary{}
+	summary.CalculateTotal(&fatura)
+
+	return &summary, nil
 }
 
 func (s *FaturaService) DeleteFatura(id string) error {
@@ -97,7 +103,7 @@ func (s *FaturaService) DeleteFatura(id string) error {
 	return nil
 }
 
-func (s *FaturaService) GetFaturaParcelado(id string) (*models.Fatura, error) {
+func (s *FaturaService) GetFaturaParcelado(id string) (*dto.ResponseFatura, error) {
 	bills, err := s.billRepo.GetParcelado(id)
 	if err != nil {
 		return nil, err
@@ -108,10 +114,12 @@ func (s *FaturaService) GetFaturaParcelado(id string) (*models.Fatura, error) {
 		Bills: bills,
 	}
 	fatura_parcelado.CalculateTotal()
-	return &fatura_parcelado, nil
+
+	responseFatura := dto.NewResponseFatura(&fatura_parcelado)
+	return &responseFatura, nil
 }
 
-func (s *FaturaService) GetFaturaFixo(id string) (*models.Fatura, error) {
+func (s *FaturaService) GetFaturaFixo(id string) (*dto.ResponseFatura, error) {
 	bills, err := s.billRepo.GetFixo(id)
 	if err != nil {
 		return nil, err
@@ -122,12 +130,7 @@ func (s *FaturaService) GetFaturaFixo(id string) (*models.Fatura, error) {
 		Bills: bills,
 	}
 	fatura_fixo.CalculateTotal()
-	return &fatura_fixo, nil
-}
 
-func (s *FaturaService) CalculateSummary(fatura *models.Fatura) *models.Summary {
-	summary := models.Summary{}
-	summary.CalculateTotal(fatura)
-
-	return &summary
+	responseFatura := dto.NewResponseFatura(&fatura_fixo)
+	return &responseFatura, nil
 }

@@ -42,4 +42,9 @@ var routes = []route{
 		method:   http.MethodGet,
 		function: controllers.GetFaturaFixo,
 	},
+	{
+		URI:      "/fatura/{id}/category",
+		method:   http.MethodGet,
+		function: controllers.GetFaturaByCategory,
+	},
 }

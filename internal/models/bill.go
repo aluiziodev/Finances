@@ -7,12 +7,12 @@ import (
 )
 
 type Bill struct {
-	Id       string `json:"id"`
-	Date     string `json:"date" csv:"date"`
-	Title    string `json:"title" csv:"title"`
-	Amount   Value  `json:"amount" csv:"amount"`
-	Method   string `json:"method"`
-	Category string `json:"category"`
+	Id       string
+	Date     string `csv:"date"`
+	Title    string `csv:"title"`
+	Amount   Value  `csv:"amount"`
+	Method   string
+	Category string
 }
 
 func (b *Bill) DefineMethod() {

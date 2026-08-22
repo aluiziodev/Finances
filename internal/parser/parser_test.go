@@ -2,7 +2,7 @@ package parser
 
 import (
 	"bytes"
-	"finances/internal/models"
+	"finances/internal/dto"
 	"mime/multipart"
 	"strings"
 	"testing"
@@ -49,7 +49,7 @@ func TestParserCSVtoModels_ValidCSV(t *testing.T) {
 	file, handler := createCSVMultipartFile(t, "fatura.csv", "date,title,amount\n2024-01-01,Compra,\"100,50\"\n")
 	defer file.Close()
 
-	fatura, err := ParserCSVtoModels(file, handler, models.RequestFatura{
+	fatura, err := ParserCSVtoModels(file, handler, dto.RequestFatura{
 		Description: "Fatura de teste",
 		Bank:        "Banco Teste",
 		Status:      "paid",
@@ -75,7 +75,7 @@ func TestParserCSVtoModels_InvalidExtension(t *testing.T) {
 	file, handler := createCSVMultipartFile(t, "fatura.txt", "date,title,amount\n2024-01-01,Compra,100.50\n")
 	defer file.Close()
 
-	_, err := ParserCSVtoModels(file, handler, models.RequestFatura{
+	_, err := ParserCSVtoModels(file, handler, dto.RequestFatura{
 		Description: "Fatura de teste",
 		Bank:        "Banco Teste",
 		Status:      "paid",

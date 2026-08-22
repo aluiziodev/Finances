@@ -5,12 +5,12 @@ import (
 )
 
 type Fatura struct {
-	Id          string  `json:"id"`
-	Description string  `json:"description"`
-	Bank        string  `json:"bank"`
-	Bills       []Bill  `json:"bills"`
-	Total       float64 `json:"total"`
-	Status      string  `json:"status"`
+	Id          string
+	Description string
+	Bank        string
+	Bills       []Bill
+	Total       float64
+	Status      string
 }
 
 func (f *Fatura) CalculateTotal() {

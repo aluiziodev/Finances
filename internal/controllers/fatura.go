@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"finances/internal/models"
+	"finances/internal/dto"
 	"finances/internal/response"
 	"finances/internal/service"
 	"fmt"
@@ -12,10 +12,13 @@ import (
 var getFaturaService = func() *service.FaturaService {
 	return service.NewFaturaService()
 }
+var getBillService = func() *service.BillService {
+	return service.NewBillService()
+}
 
 func CreateFatura(w http.ResponseWriter, r *http.Request) {
 
-	var req models.RequestFatura
+	var req dto.RequestFatura
 
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
@@ -38,13 +41,13 @@ func CreateFatura(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	service := getFaturaService()
-	fatura, err := service.CreateFatura(file, handler, req)
+	id, err := service.CreateFatura(file, handler, req)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response.WriteJSON(w, http.StatusCreated, *fatura)
+	response.WriteJSON(w, http.StatusCreated, fmt.Sprintf("Id: criado como sucesso: %s", *id))
 }
 
 func ShowFaturas(w http.ResponseWriter, r *http.Request) {
@@ -70,9 +73,7 @@ func GetFatura(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	summary := service.CalculateSummary(fatura)
-
-	response.WriteJSON(w, http.StatusOK, *summary)
+	response.WriteJSON(w, http.StatusOK, *fatura)
 
 }
 
@@ -113,6 +114,26 @@ func GetFaturaParcelado(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	response.WriteJSON(w, http.StatusOK, *fatura)
+
+}
+
+func GetFaturaByCategory(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	var req dto.RequestCategory
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.ErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	service := getBillService()
+	fatura, err := service.GetBillsByCategory(id, req.Category)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 	response.WriteJSON(w, http.StatusOK, *fatura)
 
 }
