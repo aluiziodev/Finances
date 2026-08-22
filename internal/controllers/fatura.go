@@ -55,7 +55,7 @@ func ShowFaturas(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.WriteJSON(w, http.StatusOK, faturas)
+	response.WriteJSON(w, http.StatusOK, *faturas)
 
 }
 
@@ -70,6 +70,49 @@ func GetFatura(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.WriteJSON(w, http.StatusOK, fatura)
+	summary := service.CalculateSummary(fatura)
+
+	response.WriteJSON(w, http.StatusOK, *summary)
+
+}
+
+func DeleteFatura(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	service := getFaturaService()
+	err := service.DeleteFatura(id)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, map[string]string{"message": "Fatura deletada com sucesso"})
+}
+
+func GetFaturaFixo(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	service := getFaturaService()
+	fatura, err := service.GetFaturaFixo(id)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, *fatura)
+
+}
+
+func GetFaturaParcelado(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	service := getFaturaService()
+	fatura, err := service.GetFaturaParcelado(id)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, *fatura)
 
 }

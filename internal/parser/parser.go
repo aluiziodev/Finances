@@ -9,7 +9,7 @@ import (
 	"github.com/gocarina/gocsv"
 )
 
-func ParserCSVtoModels(file multipart.File, handler *multipart.FileHeader, description string, status string) (models.Fatura, error) {
+func ParserCSVtoModels(file multipart.File, handler *multipart.FileHeader, req models.RequestFatura) (models.Fatura, error) {
 
 	if !strings.HasSuffix(strings.ToLower(handler.Filename), ".csv") {
 		return models.Fatura{}, errors.New("arquivo deve ser .csv")
@@ -20,17 +20,25 @@ func ParserCSVtoModels(file multipart.File, handler *multipart.FileHeader, descr
 		return models.Fatura{}, err
 	}
 
-	fatura := models.Fatura{
-		Description: description,
-		Bills:       bills,
-		Status:      status,
-	}
+	formatBills(&bills)
 
-	fatura.CalculateTotal()
-	if err := fatura.Validate(); err != nil {
-		return models.Fatura{}, err
+	fatura := models.Fatura{
+		Description: req.Description,
+		Bank:        req.Bank,
+		Bills:       bills,
+		Status:      req.Status,
 	}
 
 	return fatura, nil
+
+}
+
+func formatBills(bills *[]models.Bill) {
+	for i, bill := range *bills {
+		if bill.VerifyPayment() {
+			*bills = append((*bills)[:i], (*bills)[i+1:]...)
+			continue
+		}
+	}
 
 }

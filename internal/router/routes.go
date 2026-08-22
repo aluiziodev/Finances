@@ -27,4 +27,19 @@ var routes = []route{
 		method:   http.MethodGet,
 		function: controllers.GetFatura,
 	},
+	{
+		URI:      "/fatura/{id}",
+		method:   http.MethodDelete,
+		function: controllers.DeleteFatura,
+	},
+	{
+		URI:      "/fatura/{id}/parcelado",
+		method:   http.MethodGet,
+		function: controllers.GetFaturaParcelado,
+	},
+	{
+		URI:      "/fatura/{id}/fixo",
+		method:   http.MethodGet,
+		function: controllers.GetFaturaFixo,
+	},
 }

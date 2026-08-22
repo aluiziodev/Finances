@@ -52,6 +52,14 @@ func (f *mockControllerBillRepo) Delete(id string) error {
 	return nil
 }
 
+func (f *mockControllerBillRepo) GetParcelado(id string) ([]models.Bill, error) {
+	return nil, nil
+}
+
+func (f *mockControllerBillRepo) GetFixo(id string) ([]models.Bill, error) {
+	return nil, nil
+}
+
 func makeMultipartCreateRequest(t *testing.T, payload models.RequestFatura, csvContent string) *http.Request {
 	t.Helper()
 
@@ -93,7 +101,7 @@ func TestCreateFaturaController(t *testing.T) {
 		return service.NewFaturaServiceWithDependencies(faturaRepo, billRepo)
 	}
 
-	req := makeMultipartCreateRequest(t, models.RequestFatura{Description: "Fatura teste", Status: "paid"}, "date,title,amount\n2024-01-01,Compra,50.00\n")
+	req := makeMultipartCreateRequest(t, models.RequestFatura{Description: "Fatura teste", Bank: "nubank", Status: "paid"}, "date,title,amount\n2024-01-01,Compra,50.00\n")
 	res := httptest.NewRecorder()
 
 	CreateFatura(res, req)

@@ -23,15 +23,15 @@ func NewFaturaRepository() *FaturaRepository {
 
 func (repo *FaturaRepository) Create(fatura models.Fatura) error {
 	_, err := repo.db.Exec(`
-		INSERT INTO fatura (id, description, status, total)
-		VALUES ($1, $2, $3, $4)
-	`, fatura.Id, fatura.Description, fatura.Status, fatura.Total)
+		INSERT INTO fatura (id, description, bank, status, total)
+		VALUES ($1, $2, $3, $4, $5)
+	`, fatura.Id, fatura.Description, fatura.Bank, fatura.Status, fatura.Total)
 	return err
 }
 
 func (repo *FaturaRepository) GetAll() ([]models.Fatura, error) {
 	rows, err := repo.db.Query(`
-		SELECT f.id, f.description, f.status, f.total FROM fatura f
+		SELECT f.id, f.description, f.bank, f.status, f.total FROM fatura f
 	`)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (repo *FaturaRepository) GetAll() ([]models.Fatura, error) {
 
 	for rows.Next() {
 		var fatura models.Fatura
-		if err = rows.Scan(&fatura.Id, &fatura.Description, &fatura.Status, &fatura.Total); err != nil {
+		if err = rows.Scan(&fatura.Id, &fatura.Description, &fatura.Bank, &fatura.Status, &fatura.Total); err != nil {
 			return nil, err
 		}
 
@@ -54,7 +54,7 @@ func (repo *FaturaRepository) GetAll() ([]models.Fatura, error) {
 
 func (repo *FaturaRepository) Get(id string) (models.Fatura, error) {
 	row, err := repo.db.Query(`
-		SELECT f.id, f.description, f.status, f.total FROM fatura f
+		SELECT f.id, f.description,f.bank, f.status, f.total FROM fatura f
 		WHERE f.id = $1
 	`, id)
 	if err != nil {
@@ -65,7 +65,7 @@ func (repo *FaturaRepository) Get(id string) (models.Fatura, error) {
 	var fatura models.Fatura
 
 	if row.Next() {
-		if err = row.Scan(&fatura.Id, &fatura.Description, &fatura.Status, &fatura.Total); err != nil {
+		if err = row.Scan(&fatura.Id, &fatura.Description, &fatura.Bank, &fatura.Status, &fatura.Total); err != nil {
 			return models.Fatura{}, err
 		}
 		return fatura, nil

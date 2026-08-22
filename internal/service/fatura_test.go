@@ -48,6 +48,14 @@ func (f *mockBillRepo) Delete(id string) error {
 	return nil
 }
 
+func (f *mockBillRepo) GetParcelado(id string) ([]models.Bill, error) {
+	return nil, nil
+}
+
+func (f *mockBillRepo) GetFixo(id string) ([]models.Bill, error) {
+	return nil, nil
+}
+
 func createMultipartCSV(t *testing.T, filename string, content string) (multipart.File, *multipart.FileHeader) {
 	t.Helper()
 
@@ -96,6 +104,7 @@ func TestFaturaService_CreateFatura(t *testing.T) {
 
 	result, err := service.CreateFatura(file, handler, models.RequestFatura{
 		Description: "Fatura de teste",
+		Bank:        "nubank",
 		Status:      "paid",
 	})
 	if err != nil {

@@ -1,0 +1,205 @@
+{
+
+  "transporte": [
+    "uberrides",
+    "uber \\*trip",
+    "uber \\*one membership",
+    "99app",
+    "99\\*",
+    "99pop",
+    "cabify",
+    "posto",
+    "ipiranga",
+    "shell",
+    "ale combust",
+    "estacionamento",
+    "zul(?:l)?a estacio",
+    "pedagio",
+    "sem parar",
+    "conectcar",
+    "metro ",
+    "bilhete unico",
+    "vem"
+  ],
+
+  "alimentação": [
+    "ifd\\*",
+    "ifd \\*",
+    "ifood",
+    "rappi",
+    "james delivery",
+    "restaurante",
+    "lanches",
+    "lanchonete",
+    "churrascaria",
+    "cervejaria",
+    "pizzaria",
+    "hamburgueria",
+    "padaria",
+    "cafe ",
+    "coffee",
+    "sorveteria",
+    "acai",
+    "bar do",
+    "boteco"
+  ],
+
+  "mercado": [
+    "super ",
+    "supermercado",
+    "mercado ",
+    "atacad",
+    "hiper",
+    "pao de acucar",
+    "carrefour",
+    "extra ",
+    "assai",
+    "sam's club",
+    "sams club",
+    "mp \\*guanabara",
+    "guanabara"
+  ],
+
+  "saúde": [
+    "academia",
+    "smart\\s?fit",
+    "farmacia",
+    "drogaria",
+    "drogasil",
+    "pague menos",
+    "barbearia",
+    "salao",
+    "cabelereir",
+    "estetica",
+    "clinica",
+    "laboratorio",
+    "psicolog",
+    "dentista",
+    "fisioterap"
+  ],
+
+  "assinaturas": [
+    "microsoft",
+    "apple\\.com",
+    "sonyplaystatn",
+    "playstation",
+    "netflix",
+    "spotify",
+    "amazon prime",
+    "amazon\\.com\\.br\\*prime",
+    "disney",
+    "hbo",
+    "max\\*",
+    "youtube premium",
+    "google \\*",
+    "google one",
+    "icloud",
+    "openai",
+    "chatgpt",
+    "invictus",
+    "adobe",
+    "canva"
+  ],
+
+  "vestuario": [
+    "renner",
+    "riachuelo",
+    "c&a",
+    "c & a",
+    "zara",
+    "hering",
+    "marisa",
+    "centauro",
+    "netshoes",
+    "track ?field",
+    "nike",
+    "adidas"
+  ],
+
+  "celular": [
+    "recarga de celular",
+    "vivo ",
+    "claro ",
+    "tim ",
+    "oi ",
+    "algar telecom"
+  ],
+
+  "entretenimento": [
+    "beto carrero",
+    "cinema",
+    "cinemark",
+    "ingresso",
+    "sympla",
+    "eventim",
+    "smart games",
+    "parque",
+    "hopi hari",
+    "steam",
+    "playstation network",
+    "xbox",
+    "nintendo"
+  ],
+
+  "varejo": [
+    "amazonmktplc",
+    "amazon\\.com\\.br(?!\\*prime)",
+    "mercado livre",
+    "mercadolivre",
+    "shopee",
+    "aliexpress",
+    "shein",
+    "maxlivros",
+    "magazine luiza",
+    "magalu",
+    "americanas",
+    "casas bahia",
+    "submarino"
+  ],
+
+  "moradia": [
+    "enel",
+    "cemig",
+    "coelba",
+    "cagece",
+    "sabesp",
+    "condominio",
+    "iptu",
+    "aluguel",
+    "gas natural",
+    "comgas"
+  ],
+
+  "educacao": [
+    "faculdade",
+    "universidade",
+    "curso",
+    "udemy",
+    "alura",
+    "duolingo",
+    "escola ",
+    "colegio"
+  ],
+
+  "viagem": [
+    "latam",
+    "gol linhas",
+    "azul linhas",
+    "decolar",
+    "booking\\.com",
+    "airbnb",
+    "hotel",
+    "pousada",
+    "localiza",
+    "movida",
+    "unidas"
+  ],
+
+  "servicos": [
+    "iof",
+    "juros",
+    "anuidade",
+    "seguro ",
+    "nupay"
+  ]
+}

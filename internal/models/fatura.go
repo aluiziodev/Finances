@@ -7,6 +7,7 @@ import (
 type Fatura struct {
 	Id          string  `json:"id"`
 	Description string  `json:"description"`
+	Bank        string  `json:"bank"`
 	Bills       []Bill  `json:"bills"`
 	Total       float64 `json:"total"`
 	Status      string  `json:"status"`
@@ -15,9 +16,6 @@ type Fatura struct {
 func (f *Fatura) CalculateTotal() {
 	var total float64
 	for _, bill := range f.Bills {
-		if bill.Title == "Pagamento recebido" {
-			continue
-		}
 		total += float64(bill.Amount)
 	}
 	f.Total = total

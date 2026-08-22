@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bytes"
+	"finances/internal/models"
 	"mime/multipart"
 	"strings"
 	"testing"
@@ -48,7 +49,11 @@ func TestParserCSVtoModels_ValidCSV(t *testing.T) {
 	file, handler := createCSVMultipartFile(t, "fatura.csv", "date,title,amount\n2024-01-01,Compra,\"100,50\"\n")
 	defer file.Close()
 
-	fatura, err := ParserCSVtoModels(file, handler, "Fatura de teste", "paid")
+	fatura, err := ParserCSVtoModels(file, handler, models.RequestFatura{
+		Description: "Fatura de teste",
+		Bank:        "Banco Teste",
+		Status:      "paid",
+	})
 	if err != nil {
 		t.Fatalf("esperava parse valido, mas recebeu erro: %v", err)
 	}
@@ -61,8 +66,8 @@ func TestParserCSVtoModels_ValidCSV(t *testing.T) {
 		t.Fatalf("quantidade de bills inesperada: %d", len(fatura.Bills))
 	}
 
-	if fatura.Total != 100.5 {
-		t.Fatalf("total inesperado: %v", fatura.Total)
+	if fatura.Bills[0].Amount != 100.5 {
+		t.Fatalf("total inesperado: %v", fatura.Bills[0].Amount)
 	}
 }
 
@@ -70,7 +75,11 @@ func TestParserCSVtoModels_InvalidExtension(t *testing.T) {
 	file, handler := createCSVMultipartFile(t, "fatura.txt", "date,title,amount\n2024-01-01,Compra,100.50\n")
 	defer file.Close()
 
-	_, err := ParserCSVtoModels(file, handler, "Fatura de teste", "paid")
+	_, err := ParserCSVtoModels(file, handler, models.RequestFatura{
+		Description: "Fatura de teste",
+		Bank:        "Banco Teste",
+		Status:      "paid",
+	})
 	if err == nil {
 		t.Fatal("esperava erro para extensao invalida")
 	}
