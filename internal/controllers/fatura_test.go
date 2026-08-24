@@ -191,15 +191,14 @@ func TestDeleteFaturaController(t *testing.T) {
 }
 
 func TestGetFaturaParceladoController(t *testing.T) {
-	faturaRepo := &mockControllerFaturaRepo{}
 	billRepo := &mockControllerBillRepo{
 		parcelado: []models.Bill{{Id: "b1", Title: "Compra parcelada", Amount: 50.0}},
 	}
-	originalService := getFaturaService
-	getFaturaService = func() *service.FaturaService {
-		return service.NewFaturaServiceWithDependencies(faturaRepo, billRepo)
+	originalService := getBillService
+	getBillService = func() *service.BillService {
+		return service.NewBillServiceWithDependencies(billRepo)
 	}
-	defer func() { getFaturaService = originalService }()
+	defer func() { getBillService = originalService }()
 
 	req := httptest.NewRequest(http.MethodGet, "/fatura/1/parcelado", nil)
 	req.SetPathValue("id", "1")
@@ -217,15 +216,14 @@ func TestGetFaturaParceladoController(t *testing.T) {
 }
 
 func TestGetFaturaFixoController(t *testing.T) {
-	faturaRepo := &mockControllerFaturaRepo{}
 	billRepo := &mockControllerBillRepo{
 		fixo: []models.Bill{{Id: "b2", Title: "Conta fixa", Amount: 75.0}},
 	}
-	originalService := getFaturaService
-	getFaturaService = func() *service.FaturaService {
-		return service.NewFaturaServiceWithDependencies(faturaRepo, billRepo)
+	originalService := getBillService
+	getBillService = func() *service.BillService {
+		return service.NewBillServiceWithDependencies(billRepo)
 	}
-	defer func() { getFaturaService = originalService }()
+	defer func() { getBillService = originalService }()
 
 	req := httptest.NewRequest(http.MethodGet, "/fatura/1/fixo", nil)
 	req.SetPathValue("id", "1")
@@ -239,5 +237,30 @@ func TestGetFaturaFixoController(t *testing.T) {
 
 	if body := res.Body.String(); !bytes.Contains([]byte(body), []byte("Conta fixa")) {
 		t.Fatalf("resposta inesperada: %s", body)
+	}
+}
+
+func TestGetFaturaByCategoryController(t *testing.T) {
+	billRepo := &mockControllerBillRepo{
+		filtered: []models.Bill{{Id: "b1", Title: "Compra categoria", Amount: 50.0, Category: "varejo"}},
+	}
+	originalService := getBillService
+	getBillService = func() *service.BillService {
+		return service.NewBillServiceWithDependencies(billRepo)
+	}
+	defer func() { getBillService = originalService }()
+
+	req := httptest.NewRequest(http.MethodGet, "/fatura/1/category?category=varejo", nil)
+	req.SetPathValue("id", "1")
+	res := httptest.NewRecorder()
+
+	GetFaturaByCategory(res, req)
+
+	if res.Code != http.StatusOK {
+		t.Fatalf("status inesperado: %d", res.Code)
+	}
+
+	if responseBody := res.Body.String(); !bytes.Contains([]byte(responseBody), []byte("Compra categoria")) {
+		t.Fatalf("resposta inesperada: %s", responseBody)
 	}
 }

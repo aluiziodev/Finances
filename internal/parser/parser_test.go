@@ -51,7 +51,7 @@ func TestParserCSVtoModels_ValidCSV(t *testing.T) {
 
 	fatura, err := ParserCSVtoModels(file, handler, dto.RequestFatura{
 		Description: "Fatura de teste",
-		Bank:        "Banco Teste",
+		Bank:        "nubank",
 		Status:      "paid",
 	})
 	if err != nil {
@@ -77,7 +77,7 @@ func TestParserCSVtoModels_InvalidExtension(t *testing.T) {
 
 	_, err := ParserCSVtoModels(file, handler, dto.RequestFatura{
 		Description: "Fatura de teste",
-		Bank:        "Banco Teste",
+		Bank:        "nubank",
 		Status:      "paid",
 	})
 	if err == nil {

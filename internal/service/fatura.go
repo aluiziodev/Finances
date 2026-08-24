@@ -3,7 +3,6 @@ package service
 import (
 	"finances/internal/categorizer"
 	"finances/internal/dto"
-	"finances/internal/models"
 	"finances/internal/parser"
 	"finances/internal/repository"
 	"mime/multipart"
@@ -101,36 +100,4 @@ func (s *FaturaService) DeleteFatura(id string) error {
 	}
 
 	return nil
-}
-
-func (s *FaturaService) GetFaturaParcelado(id string) (*dto.ResponseFatura, error) {
-	bills, err := s.billRepo.GetParcelado(id)
-	if err != nil {
-		return nil, err
-	}
-
-	fatura_parcelado := models.Fatura{
-		Id:    id,
-		Bills: bills,
-	}
-	fatura_parcelado.CalculateTotal()
-
-	responseFatura := dto.NewResponseFatura(&fatura_parcelado)
-	return &responseFatura, nil
-}
-
-func (s *FaturaService) GetFaturaFixo(id string) (*dto.ResponseFatura, error) {
-	bills, err := s.billRepo.GetFixo(id)
-	if err != nil {
-		return nil, err
-	}
-
-	fatura_fixo := models.Fatura{
-		Id:    id,
-		Bills: bills,
-	}
-	fatura_fixo.CalculateTotal()
-
-	responseFatura := dto.NewResponseFatura(&fatura_fixo)
-	return &responseFatura, nil
 }

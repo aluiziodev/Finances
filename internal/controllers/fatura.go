@@ -93,7 +93,7 @@ func DeleteFatura(w http.ResponseWriter, r *http.Request) {
 func GetFaturaFixo(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	service := getFaturaService()
+	service := getBillService()
 	fatura, err := service.GetFaturaFixo(id)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -107,7 +107,7 @@ func GetFaturaFixo(w http.ResponseWriter, r *http.Request) {
 func GetFaturaParcelado(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	service := getFaturaService()
+	service := getBillService()
 	fatura, err := service.GetFaturaParcelado(id)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -120,16 +120,14 @@ func GetFaturaParcelado(w http.ResponseWriter, r *http.Request) {
 
 func GetFaturaByCategory(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-
-	var req dto.RequestCategory
-
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.ErrorResponse(w, http.StatusBadRequest, err.Error())
+	category := r.URL.Query().Get("category")
+	if category == "" {
+		response.ErrorResponse(w, http.StatusBadRequest, "missing category query parameter")
 		return
 	}
 
 	service := getBillService()
-	fatura, err := service.GetBillsByCategory(id, req.Category)
+	fatura, err := service.GetBillsByCategory(id, category)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
