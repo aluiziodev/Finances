@@ -1,15 +1,45 @@
 package models
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
 
 type Bill struct {
-	Id     string `json:"id"`
-	Date   string `json:"date" csv:"date"`
-	Title  string `json:"title" csv:"title"`
-	Amount Value  `json:"amount" csv:"amount"`
+	Id       string
+	Date     string `csv:"date"`
+	Title    string `csv:"title"`
+	Amount   Value  `csv:"amount"`
+	Method   string
+	Category string
+}
+
+func (b *Bill) DefineMethod() {
+	if strings.Contains(b.Title, " - Parcela ") {
+		b.Method = "parcelado"
+	} else {
+		b.Method = "fixo"
+	}
+}
+
+func (b *Bill) Validate() error {
+	if b.Title == "" {
+		return fmt.Errorf("Campo title obrigatorio!!")
+	}
+
+	if b.Method != "parcelado" && b.Method != "fixo" {
+		return fmt.Errorf("Campo method invalido!")
+	}
+
+	return nil
+}
+
+func (b *Bill) VerifyPayment() bool {
+	if b.Title == "Pagamento recebido" {
+		return true
+	}
+	return false
 }
 
 type Value float64

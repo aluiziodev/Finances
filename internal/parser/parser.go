@@ -1,36 +1,36 @@
 package parser
 
 import (
-	"errors"
+	"finances/internal/dto"
 	"finances/internal/models"
+	"fmt"
 	"mime/multipart"
 	"strings"
-
-	"github.com/gocarina/gocsv"
 )
 
-func ParserCSVtoModels(file multipart.File, handler *multipart.FileHeader, description string, status string) (models.Fatura, error) {
+type ParserInterface interface {
+	ParserCSVtoModels(file multipart.File, handler *multipart.FileHeader, req dto.RequestFatura) (models.Fatura, error)
+}
 
-	if !strings.HasSuffix(strings.ToLower(handler.Filename), ".csv") {
-		return models.Fatura{}, errors.New("arquivo deve ser .csv")
+var parsers = map[string]func() ParserInterface{
+	"nubank": func() ParserInterface { return &NubankParser{} },
+}
+
+func newParser(bank string) (ParserInterface, error) {
+	key := strings.ToLower(strings.TrimSpace(bank))
+
+	if factory, ok := parsers[key]; ok {
+		return factory(), nil
 	}
 
-	var bills []models.Bill
-	if err := gocsv.Unmarshal(file, &bills); err != nil {
+	return nil, fmt.Errorf("parser para o banco %q não encontrado", bank)
+}
+
+func ParserCSVtoModels(file multipart.File, handler *multipart.FileHeader, req dto.RequestFatura) (models.Fatura, error) {
+	parser, err := newParser(req.Bank)
+	if err != nil {
 		return models.Fatura{}, err
 	}
 
-	fatura := models.Fatura{
-		Description: description,
-		Bills:       bills,
-		Status:      status,
-	}
-
-	fatura.CalculateTotal()
-	if err := fatura.Validate(); err != nil {
-		return models.Fatura{}, err
-	}
-
-	return fatura, nil
-
+	return parser.ParserCSVtoModels(file, handler, req)
 }

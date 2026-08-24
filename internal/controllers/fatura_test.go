@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"finances/internal/dto"
 	"finances/internal/models"
 	"finances/internal/service"
 	"mime/multipart"
@@ -11,40 +12,63 @@ import (
 	"testing"
 )
 
-type fakeControllerFaturaRepo struct {
+type mockControllerFaturaRepo struct {
 	created []models.Fatura
 	list    []models.Fatura
 	byId    models.Fatura
 }
 
-func (f *fakeControllerFaturaRepo) Create(fatura models.Fatura) error {
+func (f *mockControllerFaturaRepo) Create(fatura models.Fatura) error {
 	f.created = append(f.created, fatura)
 	return nil
 }
 
-func (f *fakeControllerFaturaRepo) GetAll() ([]models.Fatura, error) {
+func (f *mockControllerFaturaRepo) GetAll() ([]models.Fatura, error) {
 	return f.list, nil
 }
 
-func (f *fakeControllerFaturaRepo) Get(id string) (models.Fatura, error) {
+func (f *mockControllerFaturaRepo) Get(id string) (models.Fatura, error) {
 	return f.byId, nil
 }
 
-type fakeControllerBillRepo struct {
-	created []models.Bill
-	list    []models.Bill
+func (f *mockControllerFaturaRepo) Delete(id string) error {
+	return nil
 }
 
-func (f *fakeControllerBillRepo) Create(bill models.Bill, faturaID string) error {
+type mockControllerBillRepo struct {
+	created   []models.Bill
+	list      []models.Bill
+	parcelado []models.Bill
+	fixo      []models.Bill
+	filtered  []models.Bill
+}
+
+func (f *mockControllerBillRepo) Create(bill models.Bill, faturaID string) error {
 	f.created = append(f.created, bill)
 	return nil
 }
 
-func (f *fakeControllerBillRepo) GetAllByFaturaId(faturaID string) ([]models.Bill, error) {
+func (f *mockControllerBillRepo) GetAllByFaturaId(faturaID string) ([]models.Bill, error) {
 	return f.list, nil
 }
 
-func makeMultipartCreateRequest(t *testing.T, payload models.RequestFatura, csvContent string) *http.Request {
+func (f *mockControllerBillRepo) Delete(id string) error {
+	return nil
+}
+
+func (f *mockControllerBillRepo) GetParcelado(id string) ([]models.Bill, error) {
+	return f.parcelado, nil
+}
+
+func (f *mockControllerBillRepo) GetFixo(id string) ([]models.Bill, error) {
+	return f.fixo, nil
+}
+
+func (f *mockControllerBillRepo) GetBillsByCategory(fatura_id string, category string) ([]models.Bill, error) {
+	return f.filtered, nil
+}
+
+func makeMultipartCreateRequest(t *testing.T, payload dto.RequestFatura, csvContent string) *http.Request {
 	t.Helper()
 
 	var body bytes.Buffer
@@ -78,14 +102,15 @@ func makeMultipartCreateRequest(t *testing.T, payload models.RequestFatura, csvC
 }
 
 func TestCreateFaturaController(t *testing.T) {
-	faturaRepo := &fakeControllerFaturaRepo{}
-	billRepo := &fakeControllerBillRepo{}
+	faturaRepo := &mockControllerFaturaRepo{}
+	billRepo := &mockControllerBillRepo{}
 	originalService := getFaturaService
 	getFaturaService = func() *service.FaturaService {
 		return service.NewFaturaServiceWithDependencies(faturaRepo, billRepo)
 	}
+	defer func() { getFaturaService = originalService }()
 
-	req := makeMultipartCreateRequest(t, models.RequestFatura{Description: "Fatura teste", Status: "paid"}, "date,title,amount\n2024-01-01,Compra,50.00\n")
+	req := makeMultipartCreateRequest(t, dto.RequestFatura{Description: "Fatura teste", Bank: "nubank", Status: "paid"}, "date,title,amount\n2024-01-01,Compra,50.00\n")
 	res := httptest.NewRecorder()
 
 	CreateFatura(res, req)
@@ -98,16 +123,16 @@ func TestCreateFaturaController(t *testing.T) {
 		t.Fatalf("quantidade de faturas esperada: 1, obtida: %d", len(faturaRepo.created))
 	}
 
-	getFaturaService = originalService
 }
 
 func TestShowFaturasController(t *testing.T) {
-	faturaRepo := &fakeControllerFaturaRepo{list: []models.Fatura{{Id: "1", Description: "Fatura teste", Status: "paid", Total: 50.0}}}
-	billRepo := &fakeControllerBillRepo{}
+	faturaRepo := &mockControllerFaturaRepo{list: []models.Fatura{{Id: "1", Description: "Fatura teste", Status: "paid", Total: 50.0}}}
+	billRepo := &mockControllerBillRepo{}
 	originalService := getFaturaService
 	getFaturaService = func() *service.FaturaService {
 		return service.NewFaturaServiceWithDependencies(faturaRepo, billRepo)
 	}
+	defer func() { getFaturaService = originalService }()
 
 	req := httptest.NewRequest(http.MethodGet, "/fatura", nil)
 	res := httptest.NewRecorder()
@@ -118,16 +143,16 @@ func TestShowFaturasController(t *testing.T) {
 		t.Fatalf("status inesperado: %d", res.Code)
 	}
 
-	getFaturaService = originalService
 }
 
 func TestGetFaturaController(t *testing.T) {
-	faturaRepo := &fakeControllerFaturaRepo{byId: models.Fatura{Id: "1", Description: "Fatura teste", Status: "paid", Total: 50.0}}
-	billRepo := &fakeControllerBillRepo{list: []models.Bill{{Id: "b1", Title: "Compra", Amount: 50.0}}}
+	faturaRepo := &mockControllerFaturaRepo{byId: models.Fatura{Id: "1", Description: "Fatura teste", Status: "paid", Total: 50.0}}
+	billRepo := &mockControllerBillRepo{list: []models.Bill{{Id: "b1", Title: "Compra", Amount: 50.0}}}
 	originalService := getFaturaService
 	getFaturaService = func() *service.FaturaService {
 		return service.NewFaturaServiceWithDependencies(faturaRepo, billRepo)
 	}
+	defer func() { getFaturaService = originalService }()
 
 	req := httptest.NewRequest(http.MethodGet, "/fatura/1", nil)
 	req.SetPathValue("id", "1")
@@ -139,5 +164,103 @@ func TestGetFaturaController(t *testing.T) {
 		t.Fatalf("status inesperado: %d", res.Code)
 	}
 
-	getFaturaService = originalService
+}
+
+func TestDeleteFaturaController(t *testing.T) {
+	faturaRepo := &mockControllerFaturaRepo{}
+	billRepo := &mockControllerBillRepo{}
+	originalService := getFaturaService
+	getFaturaService = func() *service.FaturaService {
+		return service.NewFaturaServiceWithDependencies(faturaRepo, billRepo)
+	}
+	defer func() { getFaturaService = originalService }()
+
+	req := httptest.NewRequest(http.MethodDelete, "/fatura/1", nil)
+	req.SetPathValue("id", "1")
+	res := httptest.NewRecorder()
+
+	DeleteFatura(res, req)
+
+	if res.Code != http.StatusOK {
+		t.Fatalf("status inesperado: %d", res.Code)
+	}
+
+	if body := res.Body.String(); !bytes.Contains([]byte(body), []byte("Fatura deletada com sucesso")) {
+		t.Fatalf("resposta inesperada: %s", body)
+	}
+}
+
+func TestGetFaturaParceladoController(t *testing.T) {
+	billRepo := &mockControllerBillRepo{
+		parcelado: []models.Bill{{Id: "b1", Title: "Compra parcelada", Amount: 50.0}},
+	}
+	originalService := getBillService
+	getBillService = func() *service.BillService {
+		return service.NewBillServiceWithDependencies(billRepo)
+	}
+	defer func() { getBillService = originalService }()
+
+	req := httptest.NewRequest(http.MethodGet, "/fatura/1/parcelado", nil)
+	req.SetPathValue("id", "1")
+	res := httptest.NewRecorder()
+
+	GetFaturaParcelado(res, req)
+
+	if res.Code != http.StatusOK {
+		t.Fatalf("status inesperado: %d", res.Code)
+	}
+
+	if body := res.Body.String(); !bytes.Contains([]byte(body), []byte("Compra parcelada")) {
+		t.Fatalf("resposta inesperada: %s", body)
+	}
+}
+
+func TestGetFaturaFixoController(t *testing.T) {
+	billRepo := &mockControllerBillRepo{
+		fixo: []models.Bill{{Id: "b2", Title: "Conta fixa", Amount: 75.0}},
+	}
+	originalService := getBillService
+	getBillService = func() *service.BillService {
+		return service.NewBillServiceWithDependencies(billRepo)
+	}
+	defer func() { getBillService = originalService }()
+
+	req := httptest.NewRequest(http.MethodGet, "/fatura/1/fixo", nil)
+	req.SetPathValue("id", "1")
+	res := httptest.NewRecorder()
+
+	GetFaturaFixo(res, req)
+
+	if res.Code != http.StatusOK {
+		t.Fatalf("status inesperado: %d", res.Code)
+	}
+
+	if body := res.Body.String(); !bytes.Contains([]byte(body), []byte("Conta fixa")) {
+		t.Fatalf("resposta inesperada: %s", body)
+	}
+}
+
+func TestGetFaturaByCategoryController(t *testing.T) {
+	billRepo := &mockControllerBillRepo{
+		filtered: []models.Bill{{Id: "b1", Title: "Compra categoria", Amount: 50.0, Category: "varejo"}},
+	}
+	originalService := getBillService
+	getBillService = func() *service.BillService {
+		return service.NewBillServiceWithDependencies(billRepo)
+	}
+	defer func() { getBillService = originalService }()
+
+	req := httptest.NewRequest(http.MethodGet, "/fatura/1/category?category=varejo", nil)
+	req.SetPathValue("id", "1")
+	res := httptest.NewRecorder()
+
+	GetFaturaByCategory(res, req)
+
+	if res.Code != http.StatusOK {
+		t.Fatalf("status inesperado: %d", res.Code)
+	}
+
+	if responseBody := res.Body.String(); !bytes.Contains([]byte(responseBody), []byte("Compra categoria")) {
+		t.Fatalf("resposta inesperada: %s", responseBody)
+	}
 }

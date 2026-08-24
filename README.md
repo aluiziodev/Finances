@@ -1,6 +1,6 @@
 # Finances
 
-API para registrar e consultar faturas financeiras a partir de arquivos CSV de extratos.
+API para registrar e consultar faturas a partir de arquivos CSV de extrato.
 
 ## Visão geral
 
@@ -8,10 +8,10 @@ O projeto recebe um arquivo CSV contendo registros financeiros, valida a estrutu
 
 ## Funcionalidades
 
-- Upload de CSV com transações da fatura
-- Cálculo automático do valor total
-- Persistência de faturas e transações
-- Consulta de todas as faturas e de uma fatura específica por ID
+- Recebe CSV no formato de extrato (ex.: Nubank)
+- Calcula automaticamente o total da fatura
+- Persiste faturas e transações no PostgreSQL
+- Endpoints para listagem e consulta por ID
 
 ## Tecnologias
 
@@ -25,11 +25,12 @@ O projeto recebe um arquivo CSV contendo registros financeiros, valida a estrutu
 ## Estrutura do projeto
 
 ```text
-.
+. 
 ├── cmd/
 │   └── api/
 │       └── main.go
 ├── internal/
+│   ├── categorizer/
 │   ├── connection/
 │   ├── controllers/
 │   ├── models/
@@ -63,41 +64,36 @@ API_PORT= # porta em que a API será executada
 
 ## Banco de dados
 
-O script de criação das tabelas está em `sql/database.sql`.
+O script de criação das tabelas está em `sql/database.sql`. 
 
-```sql
-CREATE TABLE fatura (
-    id TEXT PRIMARY KEY,
-    description TEXT NOT NULL,
-    status TEXT NOT NULL,
-    total NUMERIC(10,2) NOT NULL,
 
-    CONSTRAINT status_check
-        CHECK (status IN ('pending', 'paid'))
-);
-
-CREATE TABLE bill (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    date TEXT NOT NULL,
-    amount NUMERIC(10,2) NOT NULL,
-    fatura TEXT NOT NULL,
-
-    CONSTRAINT fk_fatura
-        FOREIGN KEY (fatura)
-        REFERENCES fatura(id)
-        ON DELETE CASCADE
-);
-```
-
+Execute o `sql/database.sql` no seu banco antes de rodar a aplicação.
 
 ## Endpoints
 
-| Método | Rota | Descrição | Exemplo |
-| --- | --- | --- | --- |
-| `POST` | `/fatura` | Cria uma nova fatura a partir de um CSV e dos dados da fatura | `curl -X POST http://localhost:8080/fatura -F 'data={"description":"Fatura de julho","status":"pending"}' -F 'csv=@template/fatura.csv'` |
-| `GET` | `/fatura` | Lista todas as faturas cadastradas | `curl http://localhost:8080/fatura` |
-| `GET` | `/fatura/{id}` | Busca uma fatura específica pelo ID | `curl http://localhost:8080/fatura/123e4567-e89b-12d3-a456-426614174000` |
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `POST` | `/fatura` | Cria uma nova fatura a partir de um CSV e dos dados da fatura (multipart/form-data) |
+| `GET` | `/fatura` | Lista todas as faturas cadastradas |
+| `GET` | `/fatura/{id}` | Busca uma fatura específica pelo ID |
+| `DELETE` | `/fatura/{id}` | Deleta a fatura (remove lançamentos relacionados) |
+| `GET` | `/fatura/{id}/parcelado` | Retorna apenas lançamentos com `method = "parcelado"` |
+| `GET` | `/fatura/{id}/fixo` | Retorna apenas lançamentos com `method = "fixo"` |
+| `GET` | `/fatura/{id}/category` | Retorna lançamentos filtrados por categoria |
+
+Exemplo de `curl` para criar uma fatura (note o campo `data` com JSON e o arquivo CSV em `template/`):
+
+```bash
+curl -X POST http://localhost:8080/fatura \
+  -F 'data={"description":"Fatura de julho","status":"pending"}' \
+  -F 'csv=@template/Nubank_2026-08-14.csv'
+```
+
+Exemplo de `curl` para filtrar por categoria:
+
+```bash
+curl "http://localhost:8080/fatura/123/category?category=varejo"
+```
 
 ### Payload da criação
 
