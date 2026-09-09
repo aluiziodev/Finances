@@ -8,6 +8,7 @@ import (
 
 type Bill struct {
 	Id       string
+	FaturaID string
 	Date     string `csv:"date"`
 	Title    string `csv:"title"`
 	Amount   Value  `csv:"amount"`
@@ -25,11 +26,15 @@ func (b *Bill) DefineMethod() {
 
 func (b *Bill) Validate() error {
 	if b.Title == "" {
-		return fmt.Errorf("Campo title obrigatorio!!")
+		return fmt.Errorf("Title is required")
+	}
+
+	if b.FaturaID == "" {
+		return fmt.Errorf("Invoice id is required")
 	}
 
 	if b.Method != "parcelado" && b.Method != "fixo" {
-		return fmt.Errorf("Campo method invalido!")
+		return fmt.Errorf("Invalid method")
 	}
 
 	return nil

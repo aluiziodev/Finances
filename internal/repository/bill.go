@@ -25,7 +25,7 @@ func NewBillRepository() *BillRepository {
 
 func (repo *BillRepository) Create(bill models.Bill, fatura_id string) error {
 	_, err := repo.db.Exec(`
-		INSERT INTO bill (id, title, date, amount, fatura, method, category)
+		INSERT INTO bill (id, title, date, amount, fatura_id, method, category)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`, bill.Id, bill.Title, bill.Date, bill.Amount, fatura_id, bill.Method, bill.Category)
 	return err
@@ -34,7 +34,7 @@ func (repo *BillRepository) Create(bill models.Bill, fatura_id string) error {
 func (repo *BillRepository) GetAllByFaturaId(fatura_id string) ([]models.Bill, error) {
 	rows, err := repo.db.Query(`
 		SELECT b.id, b.title, b.date, b.amount, b.category, b.method FROM bill b
-		WHERE b.fatura = $1
+		WHERE b.fatura_id = $1
 	`, fatura_id)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (repo *BillRepository) Delete(id string) error {
 func (repo *BillRepository) GetParcelado(fatura_id string) ([]models.Bill, error) {
 	rows, err := repo.db.Query(`
 		SELECT b.id, b.title, b.date, b.amount, b.category, b.method FROM bill b
-		WHERE b.fatura = $1 AND b.method = 'parcelado'
+		WHERE b.fatura_id = $1 AND b.method = 'parcelado'
 	`, fatura_id)
 	if err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func (repo *BillRepository) GetParcelado(fatura_id string) ([]models.Bill, error
 func (repo *BillRepository) GetFixo(fatura_id string) ([]models.Bill, error) {
 	rows, err := repo.db.Query(`
 		SELECT b.id, b.title, b.date, b.amount, b.category, b.method FROM bill b
-		WHERE b.fatura = $1 AND b.method = 'fixo'
+		WHERE b.fatura_id = $1 AND b.method = 'fixo'
 	`, fatura_id)
 	if err != nil {
 		return nil, err
@@ -113,7 +113,7 @@ func (repo *BillRepository) GetFixo(fatura_id string) ([]models.Bill, error) {
 func (repo *BillRepository) GetBillsByCategory(fatura_id string, category string) ([]models.Bill, error) {
 	rows, err := repo.db.Query(`
 		SELECT b.id, b.title, b.date, b.amount, b.category, b.method FROM bill b
-		WHERE b.fatura = $1 AND b.category = $2
+		WHERE b.fatura_id = $1 AND b.category = $2
 	`, fatura_id, category)
 	if err != nil {
 		return nil, err

@@ -26,8 +26,9 @@ func (nu *NubankParser) ParserCSVtoModels(file multipart.File, handler *multipar
 	nu.formatBills(&bills)
 
 	fatura := models.Fatura{
+		Year:        req.Year,
+		Month:       req.Month,
 		Description: req.Description,
-		Bank:        req.Bank,
 		Bills:       bills,
 		Status:      req.Status,
 	}

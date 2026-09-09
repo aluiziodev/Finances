@@ -3,8 +3,9 @@ package dto
 import "finances/internal/models"
 
 type ResponseFatura struct {
+	Year        int            `json:"year"`
+	Month       int            `json:"month"`
 	Description string         `json:"description"`
-	Bank        string         `json:"bank"`
 	Bills       []ResponseBill `json:"bills"`
 	Status      string         `json:"status"`
 	Total       float64        `json:"total"`
@@ -12,8 +13,9 @@ type ResponseFatura struct {
 
 func NewResponseFatura(fatura *models.Fatura) ResponseFatura {
 	return ResponseFatura{
+		Year:        fatura.Year,
+		Month:       fatura.Month,
 		Description: fatura.Description,
-		Bank:        fatura.Bank,
 		Bills:       BillsToResponseBills(&fatura.Bills),
 		Status:      fatura.Status,
 		Total:       fatura.Total,

@@ -11,28 +11,36 @@ import (
 )
 
 type FaturaService struct {
+	cardRepo   repository.CardRepositoryInterface
 	faturaRepo repository.FaturaRepositoryInterface
 	billRepo   repository.BillRepositoryInterface
 }
 
-func NewFaturaServiceWithDependencies(faturaRepo repository.FaturaRepositoryInterface, billRepo repository.BillRepositoryInterface) *FaturaService {
+func NewFaturaServiceWithDependencies(cardRepo repository.CardRepositoryInterface, faturaRepo repository.FaturaRepositoryInterface, billRepo repository.BillRepositoryInterface) *FaturaService {
 	return &FaturaService{
+		cardRepo:   cardRepo,
 		faturaRepo: faturaRepo,
 		billRepo:   billRepo,
 	}
 }
 
 func NewFaturaService() *FaturaService {
-	return NewFaturaServiceWithDependencies(repository.NewFaturaRepository(), repository.NewBillRepository())
+	return NewFaturaServiceWithDependencies(repository.NewCardRepository(), repository.NewFaturaRepository(), repository.NewBillRepository())
 }
 
 func (s *FaturaService) CreateFatura(file multipart.File, handler *multipart.FileHeader,
-	req dto.RequestFatura) (*string, error) {
+	req dto.RequestFatura, card_id string) (*string, error) {
 
-	fatura, err := parser.ParserCSVtoModels(file, handler, req)
+	bank, err := s.cardRepo.GetBankByCardId(card_id)
 	if err != nil {
 		return nil, err
 	}
+	fatura, err := parser.ParserCSVtoModels(file, handler, req, bank)
+	if err != nil {
+		return nil, err
+	}
+
+	fatura.CardID = card_id
 
 	if err := fatura.Validate(); err != nil {
 		return nil, err
@@ -47,8 +55,9 @@ func (s *FaturaService) CreateFatura(file multipart.File, handler *multipart.Fil
 	for _, bill := range fatura.Bills {
 
 		bill.Id = uuid.NewString()
+		bill.FaturaID = fatura.Id
 		bill.DefineMethod()
-		bill.Category, err = categorizer.ClassifyBillTitle(bill.Title, fatura.Bank)
+		bill.Category, err = categorizer.ClassifyBillTitle(bill.Title, "nubank")
 		if err != nil {
 			return nil, err
 		}
@@ -63,8 +72,8 @@ func (s *FaturaService) CreateFatura(file multipart.File, handler *multipart.Fil
 	return &fatura.Id, nil
 }
 
-func (s *FaturaService) GetAllFaturas() (*[]dto.ResponseFatura, error) {
-	faturas, err := s.faturaRepo.GetAll()
+func (s *FaturaService) GetAllFaturas(card_id string) (*[]dto.ResponseFatura, error) {
+	faturas, err := s.faturaRepo.GetAll(card_id)
 	if err != nil {
 		return nil, err
 	}
@@ -96,6 +105,22 @@ func (s *FaturaService) GetFatura(id string) (*dto.Summary, error) {
 func (s *FaturaService) DeleteFatura(id string) error {
 
 	if err := s.faturaRepo.Delete(id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *FaturaService) UpdateFaturaPaid(id string) error {
+	if err := s.faturaRepo.UpdateStatusPaid(id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *FaturaService) UpdateFaturaPending(id string) error {
+	if err := s.faturaRepo.UpdateStatusPending(id); err != nil {
 		return err
 	}
 

@@ -1,7 +1,8 @@
 package dto
 
 type RequestFatura struct {
+	Year        int    `json:"year"`
+	Month       int    `json:"month"`
 	Description string `json:"description"`
-	Bank        string `json:"bank"`
 	Status      string `json:"status"`
 }

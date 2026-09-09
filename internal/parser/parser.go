@@ -26,8 +26,9 @@ func newParser(bank string) (ParserInterface, error) {
 	return nil, fmt.Errorf("parser para o banco %q não encontrado", bank)
 }
 
-func ParserCSVtoModels(file multipart.File, handler *multipart.FileHeader, req dto.RequestFatura) (models.Fatura, error) {
-	parser, err := newParser(req.Bank)
+func ParserCSVtoModels(file multipart.File, handler *multipart.FileHeader,
+	req dto.RequestFatura, bank string) (models.Fatura, error) {
+	parser, err := newParser(bank)
 	if err != nil {
 		return models.Fatura{}, err
 	}

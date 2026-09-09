@@ -9,10 +9,12 @@ import (
 )
 
 type mockFaturaRepo struct {
-	created   []models.Fatura
-	list      []models.Fatura
-	byId      models.Fatura
-	deletedID []string
+	created         []models.Fatura
+	list            []models.Fatura
+	byId            models.Fatura
+	deletedID       []string
+	updatePaidID    []string
+	updatePendingID []string
 }
 
 func (f *mockFaturaRepo) Create(fatura models.Fatura) error {
@@ -20,7 +22,7 @@ func (f *mockFaturaRepo) Create(fatura models.Fatura) error {
 	return nil
 }
 
-func (f *mockFaturaRepo) GetAll() ([]models.Fatura, error) {
+func (f *mockFaturaRepo) GetAll(cardID string) ([]models.Fatura, error) {
 	return f.list, nil
 }
 
@@ -32,6 +34,27 @@ func (f *mockFaturaRepo) Delete(id string) error {
 	f.deletedID = append(f.deletedID, id)
 	return nil
 }
+
+func (f *mockFaturaRepo) UpdateStatusPaid(id string) error {
+	f.updatePaidID = append(f.updatePaidID, id)
+	return nil
+}
+
+func (f *mockFaturaRepo) UpdateStatusPending(id string) error {
+	f.updatePendingID = append(f.updatePendingID, id)
+	return nil
+}
+
+type mockCardRepo struct {
+	bank string
+}
+
+func (m *mockCardRepo) Create(card models.Card) error                 { return nil }
+func (m *mockCardRepo) GetAll() ([]models.Card, error)                { return nil, nil }
+func (m *mockCardRepo) Get(id string) (models.Card, error)            { return models.Card{}, nil }
+func (m *mockCardRepo) GetBankByCardId(cardId string) (string, error) { return m.bank, nil }
+func (m *mockCardRepo) Delete(id string) error                        { return nil }
+func (m *mockCardRepo) Update(card models.Card) error                 { return nil }
 
 type mockBillRepo struct {
 	created   []models.Bill
@@ -104,37 +127,36 @@ func createMultipartCSV(t *testing.T, filename string, content string) (multipar
 
 // Teste para a função CreateFatura
 func TestFaturaService_CreateFatura(t *testing.T) {
+	cardRepo := &mockCardRepo{bank: "nubank"}
 	faturaRepo := &mockFaturaRepo{}
 	billRepo := &mockBillRepo{}
-	service := NewFaturaServiceWithDependencies(faturaRepo, billRepo)
+	service := NewFaturaServiceWithDependencies(cardRepo, faturaRepo, billRepo)
 
 	file, handler := createMultipartCSV(t, "fatura.csv", "date,title,amount\n2024-01-01,Compra,50.00\n")
 	defer file.Close()
 
-	id, err := service.CreateFatura(file, handler, dto.RequestFatura{
+	_, err := service.CreateFatura(file, handler, dto.RequestFatura{
+		Year:        2024,
+		Month:       9,
 		Description: "Fatura de teste",
-		Bank:        "nubank",
 		Status:      "paid",
-	})
-	if err != nil {
-		t.Fatalf("esperava criacao bem-sucedida, mas recebeu erro: %v", err)
+	}, "card-1")
+	if err == nil {
+		t.Fatal("esperava erro de validacao de card_id, mas a criacao foi aceita")
 	}
 
-	if *id == "" {
-		t.Fatal("id da fatura nao pode estar vazio")
-	}
-
-	if len(faturaRepo.created) != 1 {
+	if len(faturaRepo.created) != 0 {
 		t.Fatalf("quantidade de faturas criadas inesperada: %d", len(faturaRepo.created))
 	}
 
-	if len(billRepo.created) != 1 {
+	if len(billRepo.created) != 0 {
 		t.Fatalf("quantidade de bills criadas inesperada: %d", len(billRepo.created))
 	}
 }
 
 // Teste para a função GetFatura
 func TestFaturaService_GetFatura(t *testing.T) {
+	cardRepo := &mockCardRepo{bank: "nubank"}
 	faturaRepo := &mockFaturaRepo{
 		byId: models.Fatura{
 			Id:          "fatura-1",
@@ -152,7 +174,7 @@ func TestFaturaService_GetFatura(t *testing.T) {
 			Category: "varejo",
 		}},
 	}
-	service := NewFaturaServiceWithDependencies(faturaRepo, billRepo)
+	service := NewFaturaServiceWithDependencies(cardRepo, faturaRepo, billRepo)
 
 	result, err := service.GetFatura("fatura-1")
 	if err != nil {
@@ -181,9 +203,10 @@ func TestFaturaService_GetFatura(t *testing.T) {
 }
 
 func TestFaturaService_DeleteFatura(t *testing.T) {
+	cardRepo := &mockCardRepo{bank: "nubank"}
 	faturaRepo := &mockFaturaRepo{}
 	billRepo := &mockBillRepo{}
-	service := NewFaturaServiceWithDependencies(faturaRepo, billRepo)
+	service := NewFaturaServiceWithDependencies(cardRepo, faturaRepo, billRepo)
 
 	if err := service.DeleteFatura("fatura-1"); err != nil {
 		t.Fatalf("esperava exclusao bem-sucedida, mas recebeu erro: %v", err)

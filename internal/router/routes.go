@@ -13,37 +13,57 @@ type route struct {
 
 var routes = []route{
 	{
-		URI:      "/fatura",
+		URI:      "/card",
+		method:   http.MethodPost,
+		function: controllers.CreateCard,
+	},
+	{
+		URI:      "/card",
+		method:   http.MethodGet,
+		function: controllers.ShowCards,
+	},
+	{
+		URI:      "/card/{id}",
+		method:   http.MethodGet,
+		function: controllers.GetCardById,
+	},
+	{
+		URI:      "/card/{id}",
+		method:   http.MethodDelete,
+		function: controllers.DeleteCard,
+	},
+	{
+		URI:      "/card/{card_id}/fatura",
 		method:   http.MethodPost,
 		function: controllers.CreateFatura,
 	},
 	{
-		URI:      "/fatura",
+		URI:      "/card/{card_id}/fatura",
 		method:   http.MethodGet,
 		function: controllers.ShowFaturas,
 	},
 	{
-		URI:      "/fatura/{id}",
+		URI:      "/card/{card_id}/fatura/{id}",
 		method:   http.MethodGet,
 		function: controllers.GetFatura,
 	},
 	{
-		URI:      "/fatura/{id}",
+		URI:      "/card/{card_id}/fatura/{id}",
 		method:   http.MethodDelete,
 		function: controllers.DeleteFatura,
 	},
 	{
-		URI:      "/fatura/{id}/parcelado",
+		URI:      "/card/{card_id}/fatura/{id}/parcelado",
 		method:   http.MethodGet,
 		function: controllers.GetFaturaParcelado,
 	},
 	{
-		URI:      "/fatura/{id}/fixo",
+		URI:      "/card/{card_id}/fatura/{id}/fixo",
 		method:   http.MethodGet,
 		function: controllers.GetFaturaFixo,
 	},
 	{
-		URI:      "/fatura/{id}/{category}",
+		URI:      "/card/{card_id}/fatura/{id}/category/",
 		method:   http.MethodGet,
 		function: controllers.GetFaturaByCategory,
 	},

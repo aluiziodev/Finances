@@ -4,20 +4,12 @@ import (
 	"encoding/json"
 	"finances/internal/dto"
 	"finances/internal/response"
-	"finances/internal/service"
 	"fmt"
 	"net/http"
 )
 
-var getFaturaService = func() *service.FaturaService {
-	return service.NewFaturaService()
-}
-var getBillService = func() *service.BillService {
-	return service.NewBillService()
-}
-
 func CreateFatura(w http.ResponseWriter, r *http.Request) {
-
+	card_id := r.PathValue("card_id")
 	var req dto.RequestFatura
 
 	err := r.ParseMultipartForm(10 << 20)
@@ -41,7 +33,7 @@ func CreateFatura(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	service := getFaturaService()
-	id, err := service.CreateFatura(file, handler, req)
+	id, err := service.CreateFatura(file, handler, req, card_id)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
@@ -51,8 +43,9 @@ func CreateFatura(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowFaturas(w http.ResponseWriter, r *http.Request) {
+	card_id := r.PathValue("card_id")
 	service := getFaturaService()
-	faturas, err := service.GetAllFaturas()
+	faturas, err := service.GetAllFaturas(card_id)
 	if err != nil {
 		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
@@ -134,4 +127,30 @@ func GetFaturaByCategory(w http.ResponseWriter, r *http.Request) {
 	}
 	response.WriteJSON(w, http.StatusOK, *fatura)
 
+}
+
+func UpdateFaturaPaid(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	service := getFaturaService()
+	err := service.UpdateFaturaPaid(id)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, map[string]string{"message": "Status atualizado com sucesso"})
+}
+
+func UpdateFaturaPending(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	service := getFaturaService()
+	err := service.UpdateFaturaPending(id)
+	if err != nil {
+		response.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, map[string]string{"message": "Status atualizado com sucesso"})
 }
